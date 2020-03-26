@@ -43,6 +43,29 @@ timezone  = "US/Eastern"
 longitude = 43.27
 latitude  = 76.32
 
+# Some helper variables to keep track of today and yesterday to enable neat transitions
+todayDOW = 0
+yesterdayDOW = 0
+todayMOY = 0
+yesterdayMOY = 0
+todayDOM = 0
+yesterdayDOM = 0
+
+## From here, don't touch, or you might break stuff.
+# Debug mode makes time go by faster.
+DEBUG   = False
+INTERACTIVE = False # Wait for button press to switch days
+COUNTER = 0
+DAYS    = [datetime.datetime(1983, 1, 19, 9, 38), datetime.datetime(2009, 8, 13, 16, 30), datetime.datetime(1945, 5, 8, 1, 40), datetime.datetime(1776, 7, 4, 9, 32), datetime.datetime(2063, 4, 4, 23, 15), datetime.datetime(1999, 12, 31, 23, 59), datetime.datetime(1966, 9, 6, 8, 42), datetime.datetime(2013, 12, 5, 18, 53)]
+
+# global infrastructure. Don't touch.
+neocalThread = threading.Thread()
+lock         = threading.Lock()
+pixels       = neopixel.NeoPixel(neopixel_pin, neopixel_length, pixel_order=neopixel.RGB)
+interval     = 15
+if (DEBUG):
+   interval  = 5
+
 # Helper function to make neat transtions. Also turns off previous yesterday's pixels.
 def transition(yesterday, today, targetColor):
    #target and current colors for today's pixel
@@ -102,20 +125,6 @@ def transition(yesterday, today, targetColor):
      #make sure we don't reverse the transition from above if we change color on the same day
      if (yesterday != today):
         pixels[yesterday] = pastColor
-
-# Some helper variables to keep track of today and yesterday to enable neat transitions
-todayDOW = 0
-yesterdayDOW = 0
-todayMOY = 0
-yesterdayMOY = 0
-todayDOM = 0
-yesterdayDOM = 0
-
-# Debug mode makes time go by faster.
-DEBUG       = False
-INTERACTIVE = False # Wait for button press to switch days
-COUNTER     = 0
-DAYS        = [datetime.datetime(1983, 1, 19, 9, 38), datetime.datetime(2009, 8, 13, 16, 30), datetime.datetime(1945, 5, 8, 1, 40), datetime.datetime(1776, 7, 4, 9, 32), datetime.datetime(2063, 4, 4, 23, 15), datetime.datetime(1999, 12, 31, 23, 59), datetime.datetime(1966, 9, 6, 8, 42), datetime.datetime(2013, 12, 5, 18, 53)]
 
 # MAIN LOOP THAT WILL RUN FOREVER
 pixels = neopixel.NeoPixel(neopixel_pin, neopixel_length, pixel_order=neopixel.RGB)
