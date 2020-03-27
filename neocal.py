@@ -9,10 +9,9 @@
 # Short-Description:	Daemon which turns a 50-LED NeoPixel strip into a calendar at boot time.
 # Description:		Enable service provided by daemon.
 ### END INIT INFO
-import board
-import neopixel
+import board, neopixel
 import datetime, pytz
-import threading, random
+import threading, atexit, random
 from astral import LocationInfo
 from astral.sun import sun
 from time import sleep
@@ -126,72 +125,156 @@ def transition(yesterday, today, targetColor):
      if (yesterday != today):
         pixels[yesterday] = pastColor
 
-# MAIN LOOP THAT WILL RUN FOREVER
-pixels = neopixel.NeoPixel(neopixel_pin, neopixel_length, pixel_order=neopixel.RGB)
-for n in range(neopixel_length):
-   pixels[n] = white
-   sleep(0.01)
-sleep(1.5)
-for n in reversed(range(neopixel_length)):
-   pixels[n] = off
-   sleep(0.01)
-#pixels.fill(off)
-sleep(1)
-location = LocationInfo(city, region, latitude, longitude)
+def interrupt():
+   global neocalThread
+   global pixels
+   neocalThread.cancel()
+   sleep(1)
+   pixels.fill(off)
 
-while(True):
-   if (DEBUG):
-      now = pytz.timezone('UTC').localize(random.choice(DAYS))
-      print("DEBUG MODE. Next date = ", now)
-      if (INTERACTIVE):
-          input("Press any key to continue.")
-   else:
-      now = pytz.timezone('UTC').localize(datetime.datetime.now())
+def initPixels():
+   # initialize pixels and set location info
+   global neocalThread
+   global pixels
+   global location
+   for n in reversed(range(neopixel_length)):
+      pixels[n] = white
+      sleep(0.01)
+   sleep(1.5)
+   for n in range(neopixel_length):
+      pixels[n] = black
+      sleep(0.01)
+   sleep(1)
+   location = LocationInfo(city, region, latitude, longitude)
 
-   s = sun(location.observer, tzinfo=pytz.timezone('UTC'))
-   todayDOW = dow_offset + now.weekday() #weekday() is a method and zero-based, i.e. Monday = 0
-   todayMOY = moy_offset + now.month
-   todayDOM = dom_offset - now.day
+   # Create neocal thread, start immediately
+   neocalThread = threading.Timer(0, run, ())
+   neocalThread.start()
 
-   #determine if it's time for dusk or dawn colors
-   if (now <= s['sunrise'] or now >= s['sunset']):
-      dow_color = dow_color_night
-      moy_color = moy_color_night
-      dom_color = dom_color_night
-#      print("now:", now, "sunrise: ", s["sunrise"], "sunset:",s["sunset"], "Setting NIGHT colors")
-   else:
-      dow_color = dow_color_day
-      moy_color = moy_color_day
-      dom_color = dom_color_day
-#      print("now, ", now, "sunrise:", s["sunrise"], "sunset:", s["sunset"], "Setting DAY colors")
+def run():
+   global neocalThread
+   with lock:
+      # run neocal core
+      # this is the same as a while(True) loop, as it recursively schedules the next thread
+      # but since we're scheduling thread execution, we don't have to sleep nor do we need to loop
+      if (DEBUG):
+         now = pytz.timezone('UTC').localize(random.choice(DAYS))
+         print("DEBUG MODE. Next date = ", now)
+         if (INTERACTIVE):
+            input("Press any key to continue.")
+      else:
+         now = pytz.timezone('UTC').localize(datetime.datetime.now())
 
-   #debug mode - test transitions between days and colors
-   if (DEBUG and COUNTER % 2 == 0):
-      COUNTER += 1
-      dow_color = dow_color_night
-      moy_color = moy_color_night
-      dom_color = dom_color_night
-   elif (DEBUG and COUNTER %1 == 0):
-      COUNTER += 1
-      dow_color = dow_color_day
-      moy_color = moy_color_day
-      dom_color = dow_color_day
+      s = sun(location.observer, tzinfo=pytz.timezone('UTC'))
+      global todayDOW
+      global todayMOY
+      global todayDOM
+      todayDOW = dow_offset + now.weekday()  # weekday() is a method and zero-based, i.e. Monday = 0
+      todayMOY = moy_offset + now.month
+      todayDOM = dom_offset - now.day
 
-   dow_thread = threading.Thread(target=transition, args=(yesterdayDOW, todayDOW, dow_color))
-   moy_thread = threading.Thread(target=transition, args=(yesterdayMOY, todayMOY, moy_color))
-   dom_thread = threading.Thread(target=transition, args=(yesterdayDOM, todayDOM, dom_color))
-   dow_thread.start()
-   moy_thread.start()
-   dom_thread.start()
+      # determine if it's time for dusk or dawn colors
+      if (now <= s['sunrise'] or now >= s['sunset']):
+         dow_color = dow_color_night
+         moy_color = moy_color_night
+         dom_color = dom_color_night
+         if (DEBUG):
+            print("now:", now, "sunrise: ", s["sunrise"], "sunset:", s["sunset"], "Setting NIGHT colors")
+      else:
+         dow_color = dow_color_day
+         moy_color = moy_color_day
+         dom_color = dom_color_day
+         if (DEBUG):
+            print("now, ", now, "sunrise:", s["sunrise"], "sunset:", s["sunset"], "Setting DAY colors")
 
-   yesterdayDOW = todayDOW
-   yesterdayMOY = todayMOY
-   yesterdayDOM = todayDOM
+      # debug mode - test transitions between days and colors
+      global COUNTER
+      if (DEBUG and COUNTER % 2 == 0):
+         COUNTER += 1
+         dow_color = dow_color_night
+         moy_color = moy_color_night
+         dom_color = dom_color_night
+      elif (DEBUG and COUNTER % 1 == 0):
+         COUNTER += 1
+         dow_color = dow_color_day
+         moy_color = moy_color_day
+         dom_color = dow_color_day
 
-   if (DEBUG):
-      sleep(5)
-   else:
-      sleep(15)
+      global yesterdayDOW
+      global yesterdayMOY
+      global yesterdayDOM
+      dow_thread = threading.Thread(target=transition, args=(yesterdayDOW, todayDOW, dow_color))
+      moy_thread = threading.Thread(target=transition, args=(yesterdayMOY, todayMOY, moy_color))
+      dom_thread = threading.Thread(target=transition, args=(yesterdayDOM, todayDOM, dom_color))
+      dow_thread.start()
+      moy_thread.start()
+      dom_thread.start()
 
-pixels.fill(off) #not needed, but I like switching things off.
+      yesterdayDOW = todayDOW
+      yesterdayMOY = todayMOY
+      yesterdayDOM = todayDOM
+
+   # recursively schedule next thread
+   neocalThread = threading.Timer(interval, run, ())
+   neocalThread.start()
+
+# # MAIN LOOP THAT WILL RUN FOREVER
+# while(True):
+#    if (DEBUG):
+#       now = pytz.timezone('UTC').localize(random.choice(DAYS))
+#       print("DEBUG MODE. Next date = ", now)
+#       if (INTERACTIVE):
+#           input("Press any key to continue.")
+#    else:
+#       now = pytz.timezone('UTC').localize(datetime.datetime.now())
+#
+#    s = sun(location.observer, tzinfo=pytz.timezone('UTC'))
+#    todayDOW = dow_offset + now.weekday() #weekday() is a method and zero-based, i.e. Monday = 0
+#    todayMOY = moy_offset + now.month
+#    todayDOM = dom_offset - now.day
+#
+#    #determine if it's time for dusk or dawn colors
+#    if (now <= s['sunrise'] or now >= s['sunset']):
+#       dow_color = dow_color_night
+#       moy_color = moy_color_night
+#       dom_color = dom_color_night
+# #      print("now:", now, "sunrise: ", s["sunrise"], "sunset:",s["sunset"], "Setting NIGHT colors")
+#    else:
+#       dow_color = dow_color_day
+#       moy_color = moy_color_day
+#       dom_color = dom_color_day
+# #      print("now, ", now, "sunrise:", s["sunrise"], "sunset:", s["sunset"], "Setting DAY colors")
+#
+#    #debug mode - test transitions between days and colors
+#    if (DEBUG and COUNTER % 2 == 0):
+#       COUNTER += 1
+#       dow_color = dow_color_night
+#       moy_color = moy_color_night
+#       dom_color = dom_color_night
+#    elif (DEBUG and COUNTER %1 == 0):
+#       COUNTER += 1
+#       dow_color = dow_color_day
+#       moy_color = moy_color_day
+#       dom_color = dow_color_day
+#
+#    dow_thread = threading.Thread(target=transition, args=(yesterdayDOW, todayDOW, dow_color))
+#    moy_thread = threading.Thread(target=transition, args=(yesterdayMOY, todayMOY, moy_color))
+#    dom_thread = threading.Thread(target=transition, args=(yesterdayDOM, todayDOM, dom_color))
+#    dow_thread.start()
+#    moy_thread.start()
+#    dom_thread.start()
+#
+#    yesterdayDOW = todayDOW
+#    yesterdayMOY = todayMOY
+#    yesterdayDOM = todayDOM
+#
+#    if (DEBUG):
+#       sleep(5)
+#    else:
+#       sleep(15)
+
+#start app
+initPixels()
+# when Flask exits (SIGTERM), clear unschedule the next thread
+atexit.register(interrupt)
 #END.
