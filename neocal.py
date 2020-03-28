@@ -219,63 +219,8 @@ def run():
    neocalThread = threading.Timer(interval, run, ())
    neocalThread.start()
 
-# # MAIN LOOP THAT WILL RUN FOREVER
-# while(True):
-#    if (DEBUG):
-#       now = pytz.timezone('UTC').localize(random.choice(DAYS))
-#       print("DEBUG MODE. Next date = ", now)
-#       if (INTERACTIVE):
-#           input("Press any key to continue.")
-#    else:
-#       now = pytz.timezone('UTC').localize(datetime.datetime.now())
-#
-#    s = sun(location.observer, tzinfo=pytz.timezone('UTC'))
-#    todayDOW = dow_offset + now.weekday() #weekday() is a method and zero-based, i.e. Monday = 0
-#    todayMOY = moy_offset + now.month
-#    todayDOM = dom_offset - now.day
-#
-#    #determine if it's time for dusk or dawn colors
-#    if (now <= s['sunrise'] or now >= s['sunset']):
-#       dow_color = dow_color_night
-#       moy_color = moy_color_night
-#       dom_color = dom_color_night
-# #      print("now:", now, "sunrise: ", s["sunrise"], "sunset:",s["sunset"], "Setting NIGHT colors")
-#    else:
-#       dow_color = dow_color_day
-#       moy_color = moy_color_day
-#       dom_color = dom_color_day
-# #      print("now, ", now, "sunrise:", s["sunrise"], "sunset:", s["sunset"], "Setting DAY colors")
-#
-#    #debug mode - test transitions between days and colors
-#    if (DEBUG and COUNTER % 2 == 0):
-#       COUNTER += 1
-#       dow_color = dow_color_night
-#       moy_color = moy_color_night
-#       dom_color = dom_color_night
-#    elif (DEBUG and COUNTER %1 == 0):
-#       COUNTER += 1
-#       dow_color = dow_color_day
-#       moy_color = moy_color_day
-#       dom_color = dow_color_day
-#
-#    dow_thread = threading.Thread(target=transition, args=(yesterdayDOW, todayDOW, dow_color))
-#    moy_thread = threading.Thread(target=transition, args=(yesterdayMOY, todayMOY, moy_color))
-#    dom_thread = threading.Thread(target=transition, args=(yesterdayDOM, todayDOM, dom_color))
-#    dow_thread.start()
-#    moy_thread.start()
-#    dom_thread.start()
-#
-#    yesterdayDOW = todayDOW
-#    yesterdayMOY = todayMOY
-#    yesterdayDOM = todayDOM
-#
-#    if (DEBUG):
-#       sleep(5)
-#    else:
-#       sleep(15)
-
-#start app
+#start neocal
 initPixels()
-# when Flask exits (SIGTERM), clear unschedule the next thread
+# when neocal exits (SIGTERM), clear unschedule the next thread
 atexit.register(interrupt)
 #END.
