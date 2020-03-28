@@ -33,6 +33,7 @@ moy_color_day   = (255, 255, 0)   # yellow
 moy_color_night = (0, 255, 0)     # green
 dom_color_day   = (0, 255, 255)   # cyan
 dom_color_night = (0, 0, 255)     # blue
+black           = off
 white           = (255, 255, 255) # for reference - color tuples are in RGB (red, green, blue)
 
 # Location Setup - needed for day/night color transitions. Adjust to your location.
