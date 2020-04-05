@@ -24,7 +24,7 @@ moy_offset      = 37  # This pixel is where the twelve months of year start.
 dom_offset      = 31  # This pixel is where the thirty-one days of month start.
 
 # Color Setup - adjust colors to your preference.
-# The more white they are and the more pixels are lit, the more current it draws,
+# Note: The more white they are and the more pixels are lit, the more current it draws,
 # so make sure your power supply provides at least 3amps to your pixels.
 off             = (0, 0, 0)       # used for "inactive" pixels, i.e., pixels that aren't lit for today
 dow_color_day   = (255, 0, 255)   # magenta
@@ -43,6 +43,23 @@ timezone  = "US/Eastern"
 longitude = 43.27
 latitude  = 76.32
 
+###
+### From here, don't touch, or you might break stuff.
+###
+# Debug mode makes time go by faster.
+DEBUG   = False
+INTERACTIVE = False # Wait for button press to switch days
+COUNTER = 0
+DAYS    = [datetime.datetime(1983, 1, 19, 9, 38), datetime.datetime(2009, 8, 13, 16, 30), datetime.datetime(1945, 5, 8, 1, 40), datetime.datetime(1776, 7, 4, 9, 32), datetime.datetime(2063, 4, 4, 23, 15), datetime.datetime(1999, 12, 31, 23, 59), datetime.datetime(1966, 9, 6, 8, 42), datetime.datetime(2013, 12, 5, 18, 53)]
+
+# Global infrastructure. Don't touch.
+neocalThread = threading.Thread()
+lock         = threading.Lock()
+pixels       = neopixel.NeoPixel(neopixel_pin, neopixel_length, pixel_order=neopixel.RGB)
+interval     = 15
+if (DEBUG):
+   interval  = 5
+
 # Some helper variables to keep track of today and yesterday to enable neat transitions
 todayDOW = 0
 yesterdayDOW = 0
@@ -51,22 +68,7 @@ yesterdayMOY = 0
 todayDOM = 0
 yesterdayDOM = 0
 
-## From here, don't touch, or you might break stuff.
-# Debug mode makes time go by faster.
-DEBUG   = False
-INTERACTIVE = False # Wait for button press to switch days
-COUNTER = 0
-DAYS    = [datetime.datetime(1983, 1, 19, 9, 38), datetime.datetime(2009, 8, 13, 16, 30), datetime.datetime(1945, 5, 8, 1, 40), datetime.datetime(1776, 7, 4, 9, 32), datetime.datetime(2063, 4, 4, 23, 15), datetime.datetime(1999, 12, 31, 23, 59), datetime.datetime(1966, 9, 6, 8, 42), datetime.datetime(2013, 12, 5, 18, 53)]
-
-# global infrastructure. Don't touch.
-neocalThread = threading.Thread()
-lock         = threading.Lock()
-pixels       = neopixel.NeoPixel(neopixel_pin, neopixel_length, pixel_order=neopixel.RGB)
-interval     = 15
-if (DEBUG):
-   interval  = 5
-
-# Helper function to make neat transtions. Also turns off previous yesterday's pixels.
+# Helper function to make neat transitions. Also turns off yesterday's pixels.
 def transition(yesterday, today, targetColor):
    #target and current colors for today's pixel
    targetRed = list(targetColor)[0]
@@ -126,6 +128,7 @@ def transition(yesterday, today, targetColor):
      if (yesterday != today):
         pixels[yesterday] = pastColor
 
+# Interrupt handler that turns pixels off when neotemp exits (SIGTERM). Also unschedules the next thread.
 def interrupt():
    global neocalThread
    global pixels
@@ -133,6 +136,8 @@ def interrupt():
    sleep(1)
    pixels.fill(off)
 
+# Initializes the pixels at startup. Turns them all on and off in a neat animation, partly because we can and partly
+# to test if they are all working.
 def initPixels():
    # initialize pixels and set location info
    global neocalThread
@@ -145,13 +150,15 @@ def initPixels():
    for n in range(neopixel_length):
       pixels[n] = black
       sleep(0.01)
-   sleep(1)
+
    location = LocationInfo(city, region, latitude, longitude)
 
    # Create neocal thread, start immediately
    neocalThread = threading.Timer(0, run, ())
    neocalThread.start()
 
+# Main program, which determines the current date and lights the pixels.
+# Threading allows us to avoid while(true) loops.
 def run():
    global neocalThread
    with lock:
@@ -221,6 +228,6 @@ def run():
 
 #start neocal
 initPixels()
-# when neocal exits (SIGTERM), clear unschedule the next thread
+# when neocal exits (SIGTERM), unschedule the next thread
 atexit.register(interrupt)
 #END.

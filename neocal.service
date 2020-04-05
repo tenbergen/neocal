@@ -5,7 +5,7 @@ Description= NeoPixel Calendar
 [Service]
 User=root
 Type=simple
-ExecStart=/usr/bin/python3 /home/pi/neocal.py
+ExecStart=/usr/bin/python3 /home/pi/neocal/neocal.py
 StandardInput=tty-force
 Restart=always
 
