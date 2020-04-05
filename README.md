@@ -11,7 +11,7 @@ A perpetual calendar for Raspberry Pi using neopixel LED lights.
 - 1 40-pin header (example: https://www.amazon.com/dp/B0756KM7CY/ref=cm_sw_em_r_mt_dp_U_JtHIEbF4A8MR4)
 - soldering equipment and some extra wires
 
-## Hardware assembly:
+## Hardware assembly
 1. Solder the 40-pin header to the Raspberry Pi.
 2. Solder the Level Shifter to the protoboard following these directions: https://learn.adafruit.com/neopixels-on-raspberry-pi/raspberry-pi-wiring
 3. Solder the RGB LED strip to the +5V, Ground, and DATA pins on your protoboard.
