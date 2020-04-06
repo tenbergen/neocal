@@ -1,12 +1,12 @@
 #!/bin/bash
 
-if [ "$EUID" -ne 0 ]
+if [ $EUID > 0 ]
    then echo "Please run with sudo. Exiting."
    exit
 fi
 
 echo "Updating system and installing required software..."
-sudo apt-get update && sudo apt-get -y updgrade
+sudo apt-get update && sudo apt-get -y upgrade
 sudo apt-get install -y python3-pip
 echo "   done."
 
