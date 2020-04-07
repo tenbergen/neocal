@@ -40,6 +40,9 @@ To start/stop the service, simply run:
 ```
 sudo systemctl [start|stop] sysup.service
 ```
+## Customization
+See comments in `neocal.py` for configuration options regarding pixel orientation, pixel colors, etc.
+
 
 ## Known issues
 Lights won't go out if you stop the service or the service fails.
