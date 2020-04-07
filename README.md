@@ -17,7 +17,7 @@ A perpetual calendar for Raspberry Pi using NeoPixel LED lights.
 3. Solder the RGB LED strip to the +5V, Ground, and DATA pins on your protoboard.
 
 ## Software Dependencies
-- Raspbian Strech or higher
+- Raspbian Stretch or higher
 - root privileges
 - python3 with pip3
 - python3 modeules: adafruit-circuitpython-neopixel and rpi_ws281x (see https://learn.adafruit.com/neopixels-on-raspberry-pi/python-usage)
