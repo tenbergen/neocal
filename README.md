@@ -35,14 +35,16 @@ sudo sh install.sh
 ```
 The service will start immediately and after reboot.
 
-### Control the service
-To start/stop the service, simply run:
-```
-sudo systemctl [start|stop] sysup.service
-```
-## Customization
-See comments in `neocal.py` for configuration options regarding pixel orientation, pixel colors, etc.
+## Location Setup & Customization
+Edit variables in `neocal.py` with your favorite text editor 
+for configuration options regarding pixel orientation, your location for datetime/nightime pixel colors, etc.
+Follow instructions in the code comments.
 
+### Control the service
+To start/stop/restart the service after customization, simply run:
+```
+sudo systemctl [start|stop|restart] sysup.service
+```
 
 ## Known issues
 Lights won't go out if you stop the service or the service fails.
