@@ -1,5 +1,5 @@
 # neocal
-A perpetual calendar for Raspberry Pi using neopixel LED lights.
+A perpetual calendar for Raspberry Pi using NeoPixel LED lights.
 
 ## Hardware Requirements
 - 1 WS2811 RGB LED pixel strip with at least 50 LEDs (example: https://www.amazon.com/dp/B06XD72LYM/ref=cm_sw_em_r_mt_dp_U_WfHIEbBTP5C4D)
@@ -23,11 +23,10 @@ A perpetual calendar for Raspberry Pi using neopixel LED lights.
 - python3 modeules: adafruit-circuitpython-neopixel and rpi_ws281x (see https://learn.adafruit.com/neopixels-on-raspberry-pi/python-usage)
 
 ## Requirements
-neocal requires to be executed with sudo, as adafruit neopixel library requires elevated permissions. It also requries python3.
+neocal requires to be executed with sudo, as adafruit NeoPixel library requires elevated permissions. It also requires python3.
 
 ## Installation
-
-Execute on Raspbian stretch or newer:
+In a terminal, execute:
 ```
 git clone https://github.com/tenbergen/neocal.git
 cd neocal
@@ -37,17 +36,17 @@ The service will start immediately and after reboot.
 
 ## Location Setup & Customization
 Edit variables in `neocal.py` with your favorite text editor 
-for configuration options regarding pixel orientation, your location for datetime/nightime pixel colors, etc.
+for configuration options regarding pixel orientation, your location for datetime/nighttime pixel colors, etc.
 Follow instructions in the code comments.
 
 ### Control the service
 To start/stop/restart the service after customization, simply run:
 ```
-sudo systemctl [start|stop|restart] sysup.service
+sudo systemctl [start|stop|restart] neocal.service
 ```
 
 ## Known issues
 Lights won't go out if you stop the service or the service fails.
 
 ## Contribute
-Share the love and improve this thing. I'm sure there's plenty ways to make it better. My main concern is making somehting easy to use and versatile.
+Share the love and improve this thing. I'm sure there's plenty ways to make it better. My main concern is making something easy to use and versatile.
