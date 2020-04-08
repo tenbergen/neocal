@@ -45,8 +45,5 @@ To start/stop/restart the service after customization, simply run:
 sudo systemctl [start|stop|restart] neocal.service
 ```
 
-## Known issues
-Lights won't go out if you stop the service or the service fails.
-
 ## Contribute
 Share the love and improve this thing. I'm sure there's plenty ways to make it better. My main concern is making something easy to use and versatile.

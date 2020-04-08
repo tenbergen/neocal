@@ -19,6 +19,7 @@ from time import sleep
 # NeoPixel Setup
 neopixel_pin    = board.D18 # Set to where DATA line is connected.
 neopixel_length = 50  # Set to how many lights there are on the NeoPixel strand.
+brightness      = 1.0  # Set how bright in the range [0..1] the NeoPixels shall be.
 dow_offset      = 31  # This pixel is where the seven days of week start.
 moy_offset      = 37  # This pixel is where the twelve months of year start.
 dom_offset      = 31  # This pixel is where the thirty-one days of month start.
@@ -56,7 +57,8 @@ DAYS    = [datetime.datetime(1983, 1, 19, 9, 38), datetime.datetime(2009, 8, 13,
 neocalThread = threading.Thread()
 lock         = threading.Lock()
 pixels       = neopixel.NeoPixel(neopixel_pin, neopixel_length, pixel_order=neopixel.RGB)
-interval     = 15
+interval     = 15   # Interval between date checks.
+timeout      = 0.01 # Transition timing for animations.
 if (DEBUG):
    interval  = 5
 
@@ -145,11 +147,11 @@ def initPixels():
    global location
    for n in reversed(range(neopixel_length)):
       pixels[n] = white
-      sleep(0.01)
+      sleep(timeout)
    sleep(1.5)
    for n in range(neopixel_length):
       pixels[n] = black
-      sleep(0.01)
+      sleep(timeout)
 
    location = LocationInfo(city, region, latitude, longitude)
 

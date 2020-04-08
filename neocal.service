@@ -6,6 +6,7 @@ Description= NeoPixel Calendar
 User=root
 Type=simple
 ExecStart=/usr/bin/python3 /home/pi/neocal/neocal.py
+ExecStop=/usr/bin/python3 /home/pi/neocal/off_neopixel.py
 StandardInput=tty-force
 Restart=always
 
