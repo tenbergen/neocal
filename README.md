@@ -34,7 +34,7 @@ sudo sh install.sh
 ```
 The service will start immediately and after reboot.
 
-## Location Setup & Customization
+### Location Setup & Customization
 Edit variables in `neocal.py` with your favorite text editor 
 for configuration options regarding pixel orientation, your location for datetime/nighttime pixel colors, etc.
 Follow instructions in the code comments.
@@ -45,8 +45,20 @@ To start/stop/restart the service after customization, simply run:
 sudo systemctl [start|stop|restart] neocal.service
 ```
 
+### Add neotemp as hueGPIO component
+Install hueGPIO (https://github.com/tenbergen/hueGPIO).
+<br>
+In a terminal, execute:
+```
+sudo systemctl stop neotemp.service
+sudo systemctl disable neotemp.service
+cp /neocal/neocal.py /path/to/hueGPIO/gpio_lights/
+```
+Modify hueGPIO to install `neocal.py` as a light.
+
 ## Contribute
 Share the love and improve this thing. I'm sure there's plenty ways to make it better. My main concern is making something easy to use and versatile.
 
 ## See also
-neotemp - An adafruit NeoPixel stick thermostat for Raspberry Pi.
+[neotemp](https://github.com/tenbergen/netemp) - An adafruit NeoPixel stick thermostat for Raspberry Pi.<br/>
+[hueGPIO](https://github.com/tenbergen/hueGPIO) - A Raspberry Pi middleware for diyHUE to control LEDs connected to GPIO

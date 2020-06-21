@@ -71,13 +71,23 @@ yesterdayMOY = 0
 todayDOM = 0
 yesterdayDOM = 0
 
-# Interface function to allow hueGPIO to control the "off" color
-def setHueColor(color, brightness):
-   global off
-   off = color
-   pixels.fill(color)
-   pixels.brightness = brightness
-   print("New color received by Philipps Hue:", color, brightness)
+# Interface function to allow hueGPIO to control "off"
+def setHueColor(color, bright):
+    global off, brightness
+    global neocalThread
+    neocalThread.cancel()
+    off = int(color[0]), int(color[1]), int(color[2])
+    brightness = bright
+    if brightness == 0.0:
+        off = black
+    else:
+        pixels.brightness = brightness
+    pixels.fill(off)
+    neocalThread = threading.Timer(0, run, ())
+    neocalThread.start()
+    if DEBUG:
+        print("New color received from hueGPIO: ", off, ", brightness: ", brightness)
+
 
 # Helper function to make neat transitions. Also turns off yesterday's pixels.
 def transition(yesterday, today, targetColor):
