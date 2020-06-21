@@ -83,7 +83,7 @@ def setHueColor(color, bright):
     else:
         pixels.brightness = brightness
     pixels.fill(off)
-    neocalThread = threading.Timer(0, run, ())
+    neocalThread = threading.Timer(3, run, ())
     neocalThread.start()
     if DEBUG:
         print("New color received from hueGPIO: ", off, ", brightness: ", brightness)
