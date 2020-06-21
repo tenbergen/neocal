@@ -19,7 +19,7 @@ from time import sleep
 # NeoPixel Setup
 neopixel_pin    = board.D18 # Set to where DATA line is connected.
 neopixel_length = 50  # Set to how many lights there are on the NeoPixel strand.
-brightness      = 1.0  # Set how bright in the range [0..1] the NeoPixels shall be.
+brightness      = 1.0 # Set how bright in the range [0..1] the NeoPixels shall be.
 dow_offset      = 31  # This pixel is where the seven days of week start.
 moy_offset      = 37  # This pixel is where the twelve months of year start.
 dom_offset      = 31  # This pixel is where the thirty-one days of month start.
@@ -56,7 +56,8 @@ DAYS    = [datetime.datetime(1983, 1, 19, 9, 38), datetime.datetime(2009, 8, 13,
 # Global infrastructure. Don't touch.
 neocalThread = threading.Thread()
 lock         = threading.Lock()
-pixels       = neopixel.NeoPixel(neopixel_pin, neopixel_length, pixel_order=neopixel.RGB)
+initialized  = False
+pixels       = neopixel.NeoPixel(neopixel_pin, neopixel_length, brightness=brightness, pixel_order=neopixel.RGB)
 interval     = 15   # Interval between date checks.
 timeout      = 0.01 # Transition timing for animations.
 if (DEBUG):
@@ -69,6 +70,14 @@ todayMOY = 0
 yesterdayMOY = 0
 todayDOM = 0
 yesterdayDOM = 0
+
+# Interface function to allow hueGPIO to control the "off" color
+def setHueColor(color, brightness):
+   global off
+   off = color
+   pixels.fill(color)
+   pixels.brightness = brightness
+   print("New color received by Philipps Hue:", color, brightness)
 
 # Helper function to make neat transitions. Also turns off yesterday's pixels.
 def transition(yesterday, today, targetColor):
@@ -141,6 +150,9 @@ def interrupt():
 # Initializes the pixels at startup. Turns them all on and off in a neat animation, partly because we can and partly
 # to test if they are all working.
 def initPixels():
+   global initialized
+   if initialized:
+      return
    # initialize pixels and set location info
    global neocalThread
    global pixels
@@ -158,6 +170,7 @@ def initPixels():
    # Create neocal thread, start immediately
    neocalThread = threading.Timer(0, run, ())
    neocalThread.start()
+   initialized = True
 
 # Main program, which determines the current date and lights the pixels.
 # Threading allows us to avoid while(true) loops.

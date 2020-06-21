@@ -47,3 +47,6 @@ sudo systemctl [start|stop|restart] neocal.service
 
 ## Contribute
 Share the love and improve this thing. I'm sure there's plenty ways to make it better. My main concern is making something easy to use and versatile.
+
+## See also
+neotemp - An adafruit NeoPixel stick thermostat for Raspberry Pi.
