@@ -200,6 +200,9 @@ def initPixels():
    # Create neocal thread, start immediately
    neocalThread = threading.Timer(0, run, ())
    neocalThread.start()
+   if FILEMODE:
+       hueGPIOThread = threading.Timer(0, loadHueColor(), ())
+       hueGPIOThread.start()
    initialized = True
 
 # Main program, which determines the current date and lights the pixels.
