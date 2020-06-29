@@ -10,8 +10,8 @@
 # Description:		Enable service provided by daemon.
 ### END INIT INFO
 import board, neopixel
-import datetime, pytz
-import threading, atexit, random
+import datetime, pytz, os.path, time
+import threading, atexit, random, json
 from astral import LocationInfo
 from astral.sun import sun
 from time import sleep
@@ -62,6 +62,10 @@ interval     = 15   # Interval between date checks.
 timeout      = 0.01 # Transition timing for animations.
 if (DEBUG):
    interval  = 5
+hueGPIOThread= threading.Thread()
+FILEMODE     = False
+FILENAME     = "/path/to/hueGPIO.json"
+FILEDATE     = datetime.datetime.now()
 
 # Some helper variables to keep track of today and yesterday to enable neat transitions
 todayDOW = 0
@@ -87,6 +91,22 @@ def setHueColor(color, bright):
     neocalThread.start()
     if DEBUG:
         print("New color received from hueGPIO: ", off, ", brightness: ", brightness)
+
+
+# Interface function to read hueGPIO color changes from json file and control "off"
+def loadHueColor():
+    global FILEDATE, hueGPIOThread
+    if os.path.isfile(FILENAME):
+        with open(FILENAME) as json_file:
+            modTime = datetime.datetime.fromtimestamp(os.path.getmtime(FILENAME))
+            if modTime > FILEDATE:
+                FILEDATE = modTime
+                data = json.load(json_file)
+                color = int(data['color'].split(',')[0]), int(data['color'].split(',')[1]), int(data['color'].split(',')[2])
+                bright = float(data['brightness'])
+                setHueColor(color, bright)
+    hueGPIOThread = threading.Timer(1, loadHueColor(), ())
+    hueGPIOThread.start()
 
 
 # Helper function to make neat transitions. Also turns off yesterday's pixels.
